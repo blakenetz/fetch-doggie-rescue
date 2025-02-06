@@ -4,7 +4,7 @@ export type FormState = Partial<Record<Field | "form", string>>;
 
 type SuccessResults<T = undefined> = T extends undefined
   ? { ok: true }
-  : { ok: true; data: T };
+  : { ok: true; data: T; total: number };
 type ErrorResults = {
   ok: false;
   message?: string;

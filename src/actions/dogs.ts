@@ -2,16 +2,22 @@ import { Results, DogSearchResults, Dog } from "@/types";
 import { base } from ".";
 import z from "zod";
 
+export const limit = 30;
+
 const DogSchema = z
   .object({
     ageMin: z.string(),
     ageMax: z.string(),
     breeds: z.string(),
+    page: z.number(),
   })
   .partial();
-type DogSchemaData = z.infer<typeof DogSchema>;
+export type DogSchemaData = z.infer<typeof DogSchema>;
 
-async function handleResponse<T>(res: Response): Promise<Results<T>> {
+async function handleResponse<T>(
+  res: Response,
+  total?: number
+): Promise<Results<T>> {
   const data = await res.json().catch(() => null);
 
   if (!res.ok) {
@@ -22,37 +28,47 @@ async function handleResponse<T>(res: Response): Promise<Results<T>> {
     };
   }
 
-  return { ok: true, data } as Results<T>;
+  return { ok: true, data, total: total ?? data.length } as Results<T>;
 }
 
-async function getDogIds(params?: DogSchemaData) {
+async function getDogIds(data?: DogSchemaData) {
   const url = new URL("dogs/search", base);
-  Object.entries(params ?? {}).forEach(([key, value]) => {
-    url.searchParams.set(key, value);
-  });
 
+  // add filters
+  if (data?.ageMin) url.searchParams.set("ageMin", `${data.ageMin}`);
+  if (data?.ageMax) url.searchParams.set("ageMax", `${data.ageMax}`);
+  if (data?.breeds) {
+    data.breeds
+      .split(",")
+      .forEach((breed) => url.searchParams.set("breeds", breed));
+  }
+
+  // add pagination
+  const from = (data?.page ?? 0) * limit;
+  url.searchParams.set("size", limit.toString());
+  url.searchParams.set("from", from.toString());
+
+  // make api call
   const res = await fetch(url, { method: "GET", credentials: "include" });
   return handleResponse<DogSearchResults>(res);
 }
 
-async function getDogsByIds(ids: string[]) {
+async function getDogsByIds(searchData: DogSearchResults) {
   const url = new URL("dogs", base);
   const res = await fetch(url, {
     method: "POST",
-    body: JSON.stringify(ids),
+    body: JSON.stringify(searchData.resultIds),
     credentials: "include",
     headers: { "Content-Type": "application/json" },
   });
-  return handleResponse<Dog[]>(res);
+  return handleResponse<Dog[]>(res, searchData.total);
 }
 
-export async function fetchDogs(
-  params?: DogSchemaData
-): Promise<Results<Dog[]>> {
-  const dogResults = await getDogIds(params);
-  if (!dogResults.ok) return dogResults;
+export async function fetchDogs(data?: DogSchemaData): Promise<Results<Dog[]>> {
+  const res = await getDogIds(data);
+  if (!res.ok) return res;
 
-  return getDogsByIds(dogResults.data.resultIds);
+  return getDogsByIds(res.data);
 }
 
 export async function fetchBreeds(): Promise<Results<string[]>> {

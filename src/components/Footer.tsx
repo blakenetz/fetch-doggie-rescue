@@ -1,10 +1,20 @@
+import { DogSchemaData } from "@/actions/dogs";
 import { Button, Flex, Pagination } from "@mantine/core";
+import { useState } from "react";
 
 export interface FooterProps {
   onFilterClick: () => void;
+  total: number;
+  onPageChange: (data?: DogSchemaData) => void;
 }
 
-export default function Footer({ onFilterClick }: FooterProps) {
+export default function Footer({
+  onFilterClick,
+  total,
+  onPageChange,
+}: FooterProps) {
+  const [activePage, setPage] = useState(1);
+
   return (
     <Flex
       component="footer"
@@ -17,7 +27,14 @@ export default function Footer({ onFilterClick }: FooterProps) {
       p="xs"
     >
       <Button onClick={onFilterClick}>Filters</Button>
-      <Pagination total={10} />
+      <Pagination
+        total={total}
+        value={activePage}
+        onChange={(value) => {
+          onPageChange({ page: value });
+          setPage(value);
+        }}
+      />
     </Flex>
   );
 }

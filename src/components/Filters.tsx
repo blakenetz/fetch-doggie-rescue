@@ -22,9 +22,10 @@ export default function Filters({ onSubmit, breeds, ...props }: FilterProps) {
           <Input.Wrapper label="Age">
             <RangeSlider
               min={0}
-              max={20}
+              max={15}
+              minRange={1}
               step={1}
-              defaultValue={[0, 20]}
+              defaultValue={[0, 15]}
               name="age"
               thumbFromLabel="Minimum age"
               thumbToLabel="Maximum age"

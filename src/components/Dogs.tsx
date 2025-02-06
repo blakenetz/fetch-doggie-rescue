@@ -1,4 +1,10 @@
-import { fetchBreeds, fetchDogs, filterDogs } from "@/actions/dogs";
+import {
+  DogSchemaData,
+  fetchBreeds,
+  fetchDogs,
+  filterDogs,
+  limit,
+} from "@/actions/dogs";
 import Filters, { FilterProps } from "@/components/Filters";
 import Footer from "@/components/Footer";
 import { AppContext } from "@/context/App";
@@ -15,6 +21,7 @@ export default function Dogs() {
   const [dogs, setDogs] = useState<Dog[]>([]);
   const [breeds, setBreeds] = useState<string[]>([]);
   const [showFilter, setShowFilter] = useState(false);
+  const [total, setTotal] = useState(0);
 
   const authCtx = useContext(AuthContext);
   const appCtx = useContext(AppContext);
@@ -23,8 +30,10 @@ export default function Dogs() {
     res: Results<T>,
     setter: (value: T) => void
   ) {
-    if (res.ok) setter(res.data as T);
-    else {
+    if (res.ok) {
+      setter(res.data as T);
+      if (res.total) setTotal(res.total);
+    } else {
       if (res.status === 401) authCtx.logout();
       else {
         console.error(res);
@@ -42,13 +51,14 @@ export default function Dogs() {
       ]);
       handleResults(dogRes, setDogs);
       handleResults(breedRes, setBreeds);
+      if (dogRes.ok) setTotal(dogRes.total);
     }
 
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleFilterSubmit: FilterProps["onSubmit"] = async (e) => {
+  const handleFilter: FilterProps["onSubmit"] = async (e) => {
     e.preventDefault();
     setShowFilter(false);
     setLoading(true);
@@ -57,15 +67,15 @@ export default function Dogs() {
     handleResults(res, setDogs);
   };
 
-  const reset = async () => {
+  const update = async (data?: DogSchemaData) => {
     setLoading(true);
-    const res = await fetchDogs();
+    const res = await fetchDogs(data);
     handleResults(res, setDogs);
   };
 
   return (
     <>
-      {!loading && !dogs.length && <NoResults reset={reset} />}
+      {!loading && !dogs.length && <NoResults reset={update} />}
 
       <SimpleGrid cols={{ base: 2, sm: 3, lg: 4, xl: 5 }} mb={60}>
         {loading
@@ -107,13 +117,17 @@ export default function Dogs() {
       </SimpleGrid>
 
       <Filters
-        onSubmit={handleFilterSubmit}
+        onSubmit={handleFilter}
         opened={showFilter}
         onClose={() => setShowFilter(false)}
         breeds={breeds}
       />
 
-      <Footer onFilterClick={() => setShowFilter(true)} />
+      <Footer
+        onFilterClick={() => setShowFilter(true)}
+        total={Math.floor(total / limit) - 1}
+        onPageChange={update}
+      />
     </>
   );
 }
