@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { base } from ".";
-import { FormState } from "@/types";
+import { Results } from "@/types";
 
 const LoginSchema = z.object({
   name: z.string().min(1, "Required"),
@@ -19,9 +19,7 @@ export async function authenticate(body: LoginFormData) {
   });
 }
 
-export async function login(
-  formData: FormData
-): Promise<{ errors?: FormState; ok: boolean }> {
+export async function login(formData: FormData): Promise<Results> {
   let body: LoginFormData;
   try {
     // validate form body
@@ -31,10 +29,15 @@ export async function login(
     });
   } catch (err) {
     if (err instanceof z.ZodError)
-      return { ok: false, errors: { ...err.flatten().fieldErrors } };
+      return {
+        ok: false,
+        errors: { ...err.flatten().fieldErrors },
+        status: 400,
+      };
     return {
       ok: false,
       errors: { form: "An unknown error occurred. Please try again" },
+      status: 500,
     };
   }
 
@@ -47,6 +50,7 @@ export async function login(
       errors: {
         form: data?.message || `Login failed with status ${res.status}`,
       },
+      status: res.status,
     };
   }
 

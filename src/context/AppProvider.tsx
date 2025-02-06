@@ -1,9 +1,11 @@
 import { login, logout } from "@/actions/auth";
 import { useState } from "react";
+import { AppContext } from "./App";
 import { AuthContext } from "./Auth";
 
-export default function AuthProvider({ children }: React.PropsWithChildren) {
+export default function AppProvider({ children }: React.PropsWithChildren) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handleLogin: typeof login = async (formData) => {
     const res = await login(formData);
@@ -19,7 +21,14 @@ export default function AuthProvider({ children }: React.PropsWithChildren) {
         logout,
       }}
     >
-      {children}
+      <AppContext.Provider
+        value={{
+          errorMsg,
+          setErrorMsg,
+        }}
+      >
+        {children}
+      </AppContext.Provider>
     </AuthContext.Provider>
   );
 }

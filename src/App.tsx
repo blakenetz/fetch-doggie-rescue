@@ -1,11 +1,14 @@
-import { Stack, Text, Title } from "@mantine/core";
-import styles from "./App.module.css";
-import { useContext } from "react";
-import { AuthContext } from "@/context/Auth";
+import Dogs from "@/components/Dogs";
 import LoginForm from "@/components/LoginForm";
+import { AuthContext } from "@/context/Auth";
+import { Alert, Stack, Text, Title } from "@mantine/core";
+import { useContext } from "react";
+import styles from "./App.module.css";
+import { AppContext } from "@/context/App";
 
 function App() {
   const authCtx = useContext(AuthContext);
+  const appCtx = useContext(AppContext);
 
   return (
     <Stack
@@ -17,6 +20,19 @@ function App() {
       align="center"
     >
       <div className={styles.background} />
+
+      {appCtx.errorMsg && (
+        <Alert
+          variant="light"
+          color="red"
+          title="Oh no! We ran into an issue"
+          onClose={() => appCtx.setErrorMsg("")}
+          withCloseButton
+        >
+          {appCtx.errorMsg}
+        </Alert>
+      )}
+
       <Title order={1} ta="center" fw={300}>
         <Text component="span" fw={900} inherit>
           Fetch!
@@ -24,7 +40,7 @@ function App() {
         Dog Rescue
       </Title>
 
-      {!authCtx.isAuthenticated ? <LoginForm /> : null}
+      {!authCtx.isAuthenticated ? <LoginForm /> : <Dogs />}
     </Stack>
   );
 }
