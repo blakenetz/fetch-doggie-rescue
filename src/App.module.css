@@ -1,0 +1,12 @@
+.background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  min-width: 100dvw;
+  min-height: 100dvh;
+  z-index: -1;
+  background-image: url("/dog-background.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
