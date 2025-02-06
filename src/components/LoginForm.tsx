@@ -12,17 +12,21 @@ export default function LoginForm() {
     e.preventDefault();
     setIsLoading(true);
 
+    // attempt to login
     const formData = new FormData(e.currentTarget);
     const res = await ctx.login(formData);
-
+    // if login fails, set errors
     if (!res.ok) setErrors(res.errors ?? {});
 
     setIsLoading(false);
   };
 
   return (
-    <Paper component="form" onSubmit={handleSubmit} py="lg" px="sm" shadow="md">
+    <Paper component="form" onSubmit={handleSubmit} p="lg" shadow="md">
       <Stack>
+        <Text ta="center">
+          Before we begin, we need to get some information from you
+        </Text>
         {fields.map((field, i) => (
           <TextInput
             key={field}

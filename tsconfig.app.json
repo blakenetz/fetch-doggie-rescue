@@ -23,9 +23,10 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
+
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*", "stc/types/index.ts"]
+      "@/*": ["src/*", "src/types/index.ts"]
     }
   },
   "include": ["src"]

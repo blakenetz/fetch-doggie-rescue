@@ -4,7 +4,7 @@ import { FormState } from "@/types";
 
 const LoginSchema = z.object({
   name: z.string().min(1, "Required"),
-  email: z.string().min(1, "Required").email("Invalid email address"),
+  email: z.string().email("Invalid email address"),
 });
 type LoginFormData = z.infer<typeof LoginSchema>;
 
