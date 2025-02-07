@@ -1,9 +1,14 @@
-import { DogSchemaData, SortField, SortDirection } from "@/actions/dogs";
-import { Flex, Menu, Pagination, Button } from "@mantine/core";
+import {
+  DogSchemaData,
+  SortDirection,
+  sortDirections,
+  SortField,
+  sortFields,
+} from "@/actions/dogs";
+import { Button, Flex, Menu, Pagination } from "@mantine/core";
+import { useToggle } from "@mantine/hooks";
 import { IconSortAscending, IconSortDescending } from "@tabler/icons-react";
 import { useState } from "react";
-import { sortFields, sortDirections } from "@/actions/dogs";
-import { useToggle } from "@mantine/hooks";
 
 export interface FooterProps {
   onFilterClick: () => void;

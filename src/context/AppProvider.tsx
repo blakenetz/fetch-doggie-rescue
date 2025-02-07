@@ -4,7 +4,9 @@ import { AppContext } from "./App";
 import { AuthContext } from "./Auth";
 
 export default function AppProvider({ children }: React.PropsWithChildren) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    process.env.NODE_ENV === "development"
+  );
   const [errorMsg, setErrorMsg] = useState("");
 
   const handleLogin: typeof login = async (formData) => {

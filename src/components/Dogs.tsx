@@ -1,12 +1,22 @@
-import { DogSchemaData, fetchDogs, validate, limit } from "@/actions/dogs";
+import { DogSchemaData, fetchDogs, limit, validate } from "@/actions/dogs";
 import Filters, { FilterProps } from "@/components/Filters";
 import Footer from "@/components/Footer";
+import NoResults from "@/components/NoResults";
 import { AppContext } from "@/context/App";
 import { AuthContext } from "@/context/Auth";
 import { Dog, Results } from "@/types";
-import { Card, Image, SimpleGrid, Skeleton, Stack, Text } from "@mantine/core";
+import {
+  ActionIcon,
+  Card,
+  Image,
+  SimpleGrid,
+  Skeleton,
+  Stack,
+  Text,
+} from "@mantine/core";
+import { useSet } from "@mantine/hooks";
+import { IconHeart } from "@tabler/icons-react";
 import { useContext, useEffect, useState } from "react";
-import NoResults from "./NoResults";
 
 const placeholders = Array.from({ length: 16 }, (_el, i) => i);
 
@@ -19,6 +29,8 @@ export default function Dogs() {
   const [showFilter, setShowFilter] = useState(false);
   const [total, setTotal] = useState(0);
   const [schemaData, setSchemaData] = useState<DogSchemaData>();
+
+  const favorites = useSet<string>([]);
 
   function handleError(res: Results<Dog[]>) {
     if (res.ok) return;
@@ -77,46 +89,70 @@ export default function Dogs() {
       <SimpleGrid cols={{ base: 2, sm: 3, lg: 4, xl: 5 }} mb={60}>
         {loading
           ? placeholders.map((i) => <Skeleton key={i} w={240} h={260} />)
-          : dogs.map((dog) => (
-              <Card
-                shadow="sm"
-                padding="lg"
-                radius="md"
-                withBorder
-                key={dog.id}
-              >
-                <Card.Section>
-                  <Image src={dog.img} height={160} alt={dog.name} />
-                </Card.Section>
+          : dogs.map((dog) => {
+              const isFavorite = favorites.has(dog.id);
+              return (
+                <Card
+                  shadow="sm"
+                  padding="lg"
+                  radius="md"
+                  withBorder
+                  key={dog.id}
+                >
+                  <Card.Section pos="relative">
+                    <Image src={dog.img} height={160} alt={dog.name} />
+                    <ActionIcon
+                      radius="xl"
+                      size="md"
+                      color="red"
+                      variant="subtle"
+                      aria-label="Save to favorites"
+                      pos="absolute"
+                      top={4}
+                      right={4}
+                      onClick={() =>
+                        isFavorite
+                          ? favorites.delete(dog.id)
+                          : favorites.add(dog.id)
+                      }
+                    >
+                      <IconHeart
+                        style={{ width: "70%", height: "70%" }}
+                        stroke={4}
+                        fill={isFavorite ? "red" : "transparent"}
+                      />
+                    </ActionIcon>
+                  </Card.Section>
 
-                <Stack gap={2} mt="md">
-                  <Text size="sm">
-                    Name:{" "}
-                    <Text inherit component="span" c="dimmed">
-                      {dog.name}
+                  <Stack gap={2} mt="md">
+                    <Text size="sm">
+                      Name:{" "}
+                      <Text inherit component="span" c="dimmed">
+                        {dog.name}
+                      </Text>
                     </Text>
-                  </Text>
-                  <Text size="sm">
-                    Age:{" "}
-                    <Text inherit component="span" c="dimmed">
-                      {dog.age}
+                    <Text size="sm">
+                      Age:{" "}
+                      <Text inherit component="span" c="dimmed">
+                        {dog.age}
+                      </Text>
                     </Text>
-                  </Text>
-                  <Text size="sm">
-                    Breed:{" "}
-                    <Text inherit component="span" c="dimmed">
-                      {dog.breed}
+                    <Text size="sm">
+                      Breed:{" "}
+                      <Text inherit component="span" c="dimmed">
+                        {dog.breed}
+                      </Text>
                     </Text>
-                  </Text>
-                  <Text size="sm">
-                    Zip Code:{" "}
-                    <Text inherit component="span" c="dimmed">
-                      {dog.zip_code}
+                    <Text size="sm">
+                      Zip Code:{" "}
+                      <Text inherit component="span" c="dimmed">
+                        {dog.zip_code}
+                      </Text>
                     </Text>
-                  </Text>
-                </Stack>
-              </Card>
-            ))}
+                  </Stack>
+                </Card>
+              );
+            })}
       </SimpleGrid>
 
       <Filters
