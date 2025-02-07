@@ -1,6 +1,6 @@
 import { AuthContext } from "@/context/Auth";
 import { fields, FormState } from "@/types";
-import { Button, Loader, Paper, Stack, Text, TextInput } from "@mantine/core";
+import { Button, Paper, Stack, Text, TextInput } from "@mantine/core";
 import { FormEventHandler, useContext, useState } from "react";
 
 export default function LoginForm() {

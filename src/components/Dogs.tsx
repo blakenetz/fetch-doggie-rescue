@@ -1,4 +1,4 @@
-import { DogSchemaData, fetchDogs, filterDogs, limit } from "@/actions/dogs";
+import { DogSchemaData, fetchDogs, validate, limit } from "@/actions/dogs";
 import Filters, { FilterProps } from "@/components/Filters";
 import Footer from "@/components/Footer";
 import { AppContext } from "@/context/App";
@@ -18,17 +18,22 @@ export default function Dogs() {
   const [dogs, setDogs] = useState<Dog[]>([]);
   const [showFilter, setShowFilter] = useState(false);
   const [total, setTotal] = useState(0);
+  const [schemaData, setSchemaData] = useState<DogSchemaData>();
+
+  function handleError(res: Results<Dog[]>) {
+    if (res.ok) return;
+    if (res.status === 401) authCtx.logout();
+    else {
+      console.error(res);
+      appCtx.setErrorMsg(res.message ?? "An unexpected error occurred.");
+    }
+  }
 
   function handleResults(res: Results<Dog[]>) {
-    if (res.ok) {
+    if (!res.ok) handleError(res);
+    else {
       setDogs(res.data);
       if (res.total) setTotal(res.total);
-    } else {
-      if (res.status === 401) authCtx.logout();
-      else {
-        console.error(res);
-        appCtx.setErrorMsg(res.message ?? "An unexpected error occurred.");
-      }
     }
     setLoading(false);
   }
@@ -38,7 +43,7 @@ export default function Dogs() {
       const res = await fetchDogs();
       handleResults(res);
 
-      if (res.ok) setTotal(res.total);
+      if (res.ok && res.total) setTotal(res.total);
     }
 
     fetchData();
@@ -49,14 +54,19 @@ export default function Dogs() {
     e.preventDefault();
     setShowFilter(false);
     setLoading(true);
+
     const formData = new FormData(e.currentTarget);
-    const res = await filterDogs(formData);
-    handleResults(res);
+    const res = validate(formData);
+
+    if (res.ok) update(res.data);
+    else handleError(res);
   };
 
   const update = async (data?: DogSchemaData) => {
     setLoading(true);
-    const res = await fetchDogs(data);
+    const nextData = { ...schemaData, ...data };
+    const res = await fetchDogs(nextData);
+    setSchemaData(nextData);
     handleResults(res);
   };
 

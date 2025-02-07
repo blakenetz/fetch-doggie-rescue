@@ -58,7 +58,7 @@ export async function login(formData: FormData): Promise<Results> {
 }
 
 export async function logout() {
-  const url = new URL("auth/login", base);
+  const url = new URL("auth/logout", base);
 
   return fetch(url, { method: "POST" });
 }

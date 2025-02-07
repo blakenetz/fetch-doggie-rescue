@@ -18,7 +18,7 @@ export default function Footer({ onFilterClick, total, update }: FooterProps) {
     useToggle<SortDirection>(sortDirections);
 
   const icon =
-    sortDirection === "asc" ? <IconSortDescending /> : <IconSortAscending />;
+    sortDirection === "asc" ? <IconSortAscending /> : <IconSortDescending />;
 
   return (
     <Flex
@@ -47,7 +47,7 @@ export default function Footer({ onFilterClick, total, update }: FooterProps) {
                   key={field}
                   onClick={() => {
                     setSortField(field);
-                    update({ sortField: field, sortDirection });
+                    update({ sortField: field });
                   }}
                 >
                   {field}
@@ -59,8 +59,10 @@ export default function Footer({ onFilterClick, total, update }: FooterProps) {
             variant="default"
             aria-label="Sort Order"
             onClick={() => {
+              update({
+                sortDirection: sortDirection === "asc" ? "desc" : "asc",
+              });
               toggleSortDirection();
-              update({ sortField, sortDirection });
             }}
           >
             {icon}

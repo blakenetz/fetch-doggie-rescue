@@ -36,7 +36,7 @@ async function handleResponse<T>(
     };
   }
 
-  return { ok: true, data, total: total ?? data.length } as Results<T>;
+  return { ok: true, data, total } as Results<T>;
 }
 
 async function getDogIds(data?: DogSchemaData) {
@@ -90,7 +90,7 @@ export async function fetchBreeds(): Promise<Results<string[]>> {
   return handleResponse<string[]>(res);
 }
 
-export async function filterDogs(formData: FormData): Promise<Results<Dog[]>> {
+export function validate(formData: FormData): Results<DogSchemaData> {
   const output = DogSchema.safeParse({
     ageMin: formData.get("age_from"),
     ageMax: formData.get("age_to"),
@@ -100,5 +100,5 @@ export async function filterDogs(formData: FormData): Promise<Results<Dog[]>> {
   if (!output.success) {
     return { ok: false, message: "Invalid form data", status: 400 };
   }
-  return fetchDogs(output.data);
+  return { ok: true, data: output.data };
 }
