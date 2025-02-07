@@ -6,9 +6,19 @@ import Match from "@/components/Match";
 import NoResults from "@/components/NoResults";
 import { AppContext } from "@/context/App";
 import { Dog } from "@/types";
-import { ActionIcon, Card, Image, SimpleGrid, Skeleton } from "@mantine/core";
+import {
+  ActionIcon,
+  Button,
+  Card,
+  Image,
+  SimpleGrid,
+  Skeleton,
+  ThemeIcon,
+  ThemeIconProps,
+  UnstyledButton,
+} from "@mantine/core";
 import { useSet } from "@mantine/hooks";
-import { IconHeart } from "@tabler/icons-react";
+import { IconHeart, IconHeartFilled, IconProps } from "@tabler/icons-react";
 import { useContext, useEffect, useState } from "react";
 
 const placeholders = Array.from({ length: 16 }, (_el, i) => i);
@@ -70,6 +80,7 @@ export default function Dogs() {
           ? placeholders.map((i) => <Skeleton key={i} w={240} h={260} />)
           : dogs.map((dog) => {
               const isFavorite = favorites.has(dog.id);
+
               return (
                 <Card
                   shadow="sm"
@@ -79,28 +90,28 @@ export default function Dogs() {
                   key={dog.id}
                 >
                   <Card.Section pos="relative">
-                    <Image src={dog.img} height={160} alt={dog.name} />
-                    <ActionIcon
-                      radius="xl"
-                      size="md"
-                      color="red"
-                      variant="subtle"
+                    <UnstyledButton
+                      w="100%"
                       aria-label="Save to favorites"
-                      pos="absolute"
-                      top={4}
-                      right={4}
                       onClick={() =>
                         isFavorite
                           ? favorites.delete(dog.id)
                           : favorites.add(dog.id)
                       }
                     >
-                      <IconHeart
-                        style={{ width: "70%", height: "70%" }}
-                        stroke={4}
-                        fill={isFavorite ? "red" : "transparent"}
-                      />
-                    </ActionIcon>
+                      <Image src={dog.img} height={160} alt={dog.name} />
+                      <ThemeIcon
+                        p={3}
+                        radius="xl"
+                        color="red"
+                        variant="white"
+                        pos="absolute"
+                        top={4}
+                        right={4}
+                      >
+                        {isFavorite ? <IconHeartFilled /> : <IconHeart />}
+                      </ThemeIcon>
+                    </UnstyledButton>
                   </Card.Section>
 
                   <DogData dog={dog} />
