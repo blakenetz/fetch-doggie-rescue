@@ -1,5 +1,6 @@
 import { AppContext } from "@/context/App";
 import { fields, FormState } from "@/types";
+import { capitalize } from "@/utils";
 import { Button, Paper, Stack, Text, TextInput } from "@mantine/core";
 import { FormEventHandler, useContext, useState } from "react";
 
@@ -30,7 +31,7 @@ export default function LoginForm() {
         {fields.map((field, i) => (
           <TextInput
             key={field}
-            label={field}
+            label={capitalize(field)}
             name={field}
             autoComplete={field}
             autoFocus={i === 0}
