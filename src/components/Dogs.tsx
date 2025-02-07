@@ -1,10 +1,4 @@
-import {
-  DogSchemaData,
-  fetchBreeds,
-  fetchDogs,
-  filterDogs,
-  limit,
-} from "@/actions/dogs";
+import { DogSchemaData, fetchDogs, filterDogs, limit } from "@/actions/dogs";
 import Filters, { FilterProps } from "@/components/Filters";
 import Footer from "@/components/Footer";
 import { AppContext } from "@/context/App";
@@ -17,21 +11,17 @@ import NoResults from "./NoResults";
 const placeholders = Array.from({ length: 16 }, (_el, i) => i);
 
 export default function Dogs() {
-  const [loading, setLoading] = useState(true);
-  const [dogs, setDogs] = useState<Dog[]>([]);
-  const [breeds, setBreeds] = useState<string[]>([]);
-  const [showFilter, setShowFilter] = useState(false);
-  const [total, setTotal] = useState(0);
-
   const authCtx = useContext(AuthContext);
   const appCtx = useContext(AppContext);
 
-  function handleResults<T extends (Dog | string)[]>(
-    res: Results<T>,
-    setter: (value: T) => void
-  ) {
+  const [loading, setLoading] = useState(true);
+  const [dogs, setDogs] = useState<Dog[]>([]);
+  const [showFilter, setShowFilter] = useState(false);
+  const [total, setTotal] = useState(0);
+
+  function handleResults(res: Results<Dog[]>) {
     if (res.ok) {
-      setter(res.data as T);
+      setDogs(res.data);
       if (res.total) setTotal(res.total);
     } else {
       if (res.status === 401) authCtx.logout();
@@ -45,13 +35,10 @@ export default function Dogs() {
 
   useEffect(() => {
     async function fetchData() {
-      const [dogRes, breedRes] = await Promise.all([
-        fetchDogs(),
-        fetchBreeds(),
-      ]);
-      handleResults(dogRes, setDogs);
-      handleResults(breedRes, setBreeds);
-      if (dogRes.ok) setTotal(dogRes.total);
+      const res = await fetchDogs();
+      handleResults(res);
+
+      if (res.ok) setTotal(res.total);
     }
 
     fetchData();
@@ -64,13 +51,13 @@ export default function Dogs() {
     setLoading(true);
     const formData = new FormData(e.currentTarget);
     const res = await filterDogs(formData);
-    handleResults(res, setDogs);
+    handleResults(res);
   };
 
   const update = async (data?: DogSchemaData) => {
     setLoading(true);
     const res = await fetchDogs(data);
-    handleResults(res, setDogs);
+    handleResults(res);
   };
 
   return (
@@ -120,7 +107,6 @@ export default function Dogs() {
         onSubmit={handleFilter}
         opened={showFilter}
         onClose={() => setShowFilter(false)}
-        breeds={breeds}
       />
 
       <Footer

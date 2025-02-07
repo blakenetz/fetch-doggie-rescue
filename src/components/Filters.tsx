@@ -1,3 +1,4 @@
+import { fetchBreeds } from "@/actions/dogs";
 import {
   Stack,
   Drawer,
@@ -7,14 +8,37 @@ import {
   DrawerProps,
   Input,
 } from "@mantine/core";
-import { FormEvent } from "react";
+import { FormEvent, useContext, useEffect, useState } from "react";
+import { AppContext } from "@/context/App";
+import { AuthContext } from "@/context/Auth";
 
 export interface FilterProps extends Omit<DrawerProps, "onSubmit"> {
   onSubmit: (e: FormEvent<HTMLFormElement>) => void;
-  breeds: string[];
 }
 
-export default function Filters({ onSubmit, breeds, ...props }: FilterProps) {
+export default function Filters({ onSubmit, ...props }: FilterProps) {
+  const authCtx = useContext(AuthContext);
+  const appCtx = useContext(AppContext);
+
+  const [breeds, setBreeds] = useState<string[]>([]);
+
+  useEffect(() => {
+    async function fetchData() {
+      const res = await fetchBreeds();
+      if (res.ok) setBreeds(res.data);
+      else {
+        if (res.status === 401) authCtx.logout();
+        else {
+          console.error(res);
+          appCtx.setErrorMsg(res.message ?? "An unexpected error occurred.");
+        }
+      }
+    }
+
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <Drawer {...props}>
       <form onSubmit={onSubmit}>
