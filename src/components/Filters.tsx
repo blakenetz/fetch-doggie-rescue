@@ -40,7 +40,7 @@ export default function Filters({ onSubmit, ...props }: FilterProps) {
   }, []);
 
   return (
-    <Drawer {...props}>
+    <Drawer {...props} keepMounted>
       <form onSubmit={onSubmit}>
         <Stack gap="md">
           <Input.Wrapper label="Age">

@@ -3,6 +3,12 @@ import { base } from ".";
 import z from "zod";
 
 export const limit = 30;
+// default options are 0-index
+export const sortFields = ["breed", "name", "age"] as const;
+export const sortDirections = ["asc", "desc"] as const;
+
+export type SortField = (typeof sortFields)[number];
+export type SortDirection = (typeof sortDirections)[number];
 
 const DogSchema = z
   .object({
@@ -10,6 +16,8 @@ const DogSchema = z
     ageMax: z.string(),
     breeds: z.string(),
     page: z.number(),
+    sortField: z.enum(sortFields),
+    sortDirection: z.enum(sortDirections),
   })
   .partial();
 export type DogSchemaData = z.infer<typeof DogSchema>;
@@ -47,6 +55,11 @@ async function getDogIds(data?: DogSchemaData) {
   const from = (data?.page ?? 0) * limit;
   url.searchParams.set("size", limit.toString());
   url.searchParams.set("from", from.toString());
+
+  // add sort
+  const field: SortField = data?.sortField ?? sortFields[0];
+  const direction: SortDirection = data?.sortDirection ?? sortDirections[0];
+  url.searchParams.set("sort", `${field}:${direction}`);
 
   // make api call
   const res = await fetch(url, { method: "GET", credentials: "include" });

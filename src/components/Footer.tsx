@@ -1,21 +1,24 @@
-import { DogSchemaData } from "@/actions/dogs";
-import { ActionIcon, Flex, Menu, Pagination, Button } from "@mantine/core";
+import { DogSchemaData, SortField, SortDirection } from "@/actions/dogs";
+import { Flex, Menu, Pagination, Button } from "@mantine/core";
 import { IconSortAscending, IconSortDescending } from "@tabler/icons-react";
 import { useState } from "react";
+import { sortFields, sortDirections } from "@/actions/dogs";
+import { useToggle } from "@mantine/hooks";
 
 export interface FooterProps {
   onFilterClick: () => void;
   total: number;
-  onPageChange: (data?: DogSchemaData) => void;
+  update: (data?: DogSchemaData) => void;
 }
 
-export default function Footer({
-  onFilterClick,
-  total,
-  onPageChange,
-}: FooterProps) {
+export default function Footer({ onFilterClick, total, update }: FooterProps) {
   const [activePage, setPage] = useState(1);
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [sortField, setSortField] = useState<SortField>(sortFields[0]);
+  const [sortDirection, toggleSortDirection] =
+    useToggle<SortDirection>(sortDirections);
+
+  const icon =
+    sortDirection === "asc" ? <IconSortDescending /> : <IconSortAscending />;
 
   return (
     <Flex
@@ -31,38 +34,44 @@ export default function Footer({
     >
       <Flex gap="sm">
         <Button onClick={onFilterClick}>Filters</Button>
-        <Flex align="center" gap="xs">
-          <Menu position="top-start">
+
+        <Button.Group>
+          <Menu position="top-end">
             <Menu.Target>
-              <Button variant="subtle">Sort</Button>
+              <Button variant="default">{`Sort By: ${sortField}`}</Button>
             </Menu.Target>
             <Menu.Dropdown>
               <Menu.Label>Sort By</Menu.Label>
-              <Menu.Item>Breed</Menu.Item>
-              <Menu.Item>Name</Menu.Item>
-              <Menu.Item>Age</Menu.Item>
+              {sortFields.map((field) => (
+                <Menu.Item
+                  key={field}
+                  onClick={() => {
+                    setSortField(field);
+                    update({ sortField: field, sortDirection });
+                  }}
+                >
+                  {field}
+                </Menu.Item>
+              ))}
             </Menu.Dropdown>
           </Menu>
-          <ActionIcon
-            variant="subtle"
+          <Button
+            variant="default"
             aria-label="Sort Order"
-            onClick={() =>
-              setSortDirection(sortDirection === "asc" ? "desc" : "asc")
-            }
+            onClick={() => {
+              toggleSortDirection();
+              update({ sortField, sortDirection });
+            }}
           >
-            {sortDirection === "asc" ? (
-              <IconSortDescending />
-            ) : (
-              <IconSortAscending />
-            )}
-          </ActionIcon>
-        </Flex>
+            {icon}
+          </Button>
+        </Button.Group>
       </Flex>
       <Pagination
         total={total}
         value={activePage}
         onChange={(value) => {
-          onPageChange({ page: value });
+          update({ page: value });
           setPage(value);
         }}
       />

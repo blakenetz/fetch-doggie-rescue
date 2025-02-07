@@ -51,8 +51,8 @@ export default function LoginForm() {
 
         {errors.form && <Text c="red">{errors.form}</Text>}
 
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? <Loader size="sm" /> : "Continue"}
+        <Button type="submit" disabled={isLoading} loading={isLoading}>
+          Continue
         </Button>
       </Stack>
     </Paper>

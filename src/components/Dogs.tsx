@@ -81,6 +81,12 @@ export default function Dogs() {
 
                 <Stack gap={2} mt="md">
                   <Text size="sm">
+                    Name:{" "}
+                    <Text inherit component="span" c="dimmed">
+                      {dog.name}
+                    </Text>
+                  </Text>
+                  <Text size="sm">
                     Age:{" "}
                     <Text inherit component="span" c="dimmed">
                       {dog.age}
@@ -112,7 +118,7 @@ export default function Dogs() {
       <Footer
         onFilterClick={() => setShowFilter(true)}
         total={Math.floor(total / limit) - 1}
-        onPageChange={update}
+        update={update}
       />
     </>
   );
