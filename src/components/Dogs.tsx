@@ -54,7 +54,6 @@ export default function Dogs() {
     }
 
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleFilter: FilterProps["onSubmit"] = async (e) => {

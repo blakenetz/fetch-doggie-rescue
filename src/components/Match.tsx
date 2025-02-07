@@ -69,7 +69,6 @@ export default function Match({ favorites, opened, ...props }: MatchProps) {
 
     if (opened && favorites.length > 1) fetchData();
     return () => setMatch(undefined);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [opened, favorites]);
 
   return (

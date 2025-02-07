@@ -36,7 +36,6 @@ export default function Filters({ onSubmit, ...props }: FilterProps) {
     }
 
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
