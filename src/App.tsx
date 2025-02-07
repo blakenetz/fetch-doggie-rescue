@@ -1,14 +1,12 @@
 import Dogs from "@/components/Dogs";
 import LoginForm from "@/components/LoginForm";
-import { AuthContext } from "@/context/Auth";
-import { Alert, Stack, Text, Title } from "@mantine/core";
+import { AppContext } from "@/context/App";
+import { Alert, Divider, Flex, Stack, Text, Title } from "@mantine/core";
 import { useContext } from "react";
 import styles from "./App.module.css";
-import { AppContext } from "@/context/App";
 
 function App() {
-  const authCtx = useContext(AuthContext);
-  const appCtx = useContext(AppContext);
+  const { errorMsg, isAuthenticated, clearErrorMsg } = useContext(AppContext);
 
   return (
     <Stack
@@ -21,15 +19,23 @@ function App() {
     >
       <div className={styles.background} />
 
-      {appCtx.errorMsg && (
+      {errorMsg && (
         <Alert
           variant="light"
           color="red"
           title="Oh no! We ran into an issue"
-          onClose={() => appCtx.setErrorMsg("")}
+          onClose={clearErrorMsg}
           withCloseButton
         >
-          {appCtx.errorMsg}
+          <Flex gap="xs" align="center">
+            {errorMsg.status && (
+              <>
+                <Text c="red.9">{errorMsg.status}</Text>
+                <Divider orientation="vertical" color="gray.9" />
+              </>
+            )}
+            <Text>{errorMsg.message}</Text>
+          </Flex>
         </Alert>
       )}
 
@@ -40,7 +46,7 @@ function App() {
         Dog Rescue
       </Title>
 
-      {!authCtx.isAuthenticated ? <LoginForm /> : <Dogs />}
+      {!isAuthenticated ? <LoginForm /> : <Dogs />}
     </Stack>
   );
 }

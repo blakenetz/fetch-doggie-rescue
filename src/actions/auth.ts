@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { base } from ".";
-import { Results } from "@/types";
 
 const LoginSchema = z.object({
   name: z.string().min(1, "Required"),
@@ -8,7 +7,7 @@ const LoginSchema = z.object({
 });
 type LoginFormData = z.infer<typeof LoginSchema>;
 
-export async function authenticate(body: LoginFormData) {
+async function authenticate(body: LoginFormData) {
   const url = new URL("auth/login", base);
 
   return fetch(url, {
@@ -19,7 +18,14 @@ export async function authenticate(body: LoginFormData) {
   });
 }
 
-export async function login(formData: FormData): Promise<Results> {
+export async function login(formData: FormData): Promise<
+  | { ok: true }
+  | {
+      ok: false;
+      errors: Record<string, string | string[] | undefined>;
+      status: number;
+    }
+> {
   let body: LoginFormData;
   try {
     // validate form body
@@ -44,12 +50,9 @@ export async function login(formData: FormData): Promise<Results> {
   // authenticate
   const res = await authenticate(body);
   if (!res.ok) {
-    const data = await res.json().catch(() => null);
     return {
       ok: false,
-      errors: {
-        form: data?.message || `Login failed with status ${res.status}`,
-      },
+      errors: { form: res.statusText },
       status: res.status,
     };
   }

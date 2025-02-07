@@ -1,7 +1,6 @@
 import { fetchMatch } from "@/actions/dogs";
 import DogData from "@/components/DogData";
 import { AppContext } from "@/context/App";
-import { AuthContext } from "@/context/Auth";
 import { Dog } from "@/types/dogs";
 import {
   Center,
@@ -49,25 +48,14 @@ function ModalContent({ favorites, match }: ModalContentProps) {
 }
 
 export default function Match({ favorites, opened, ...props }: MatchProps) {
-  const authCtx = useContext(AuthContext);
-  const appCtx = useContext(AppContext);
+  const ctx = useContext(AppContext);
 
   const [match, setMatch] = useState<Dog>();
 
   useEffect(() => {
-    async function fetchData() {
-      const res = await fetchMatch(favorites);
-      if (res.ok) setMatch(res.data);
-      else {
-        if (res.status === 401) authCtx.logout();
-        else {
-          console.error(res);
-          appCtx.setErrorMsg(res.message ?? "An unexpected error occurred.");
-        }
-      }
+    if (opened && favorites.length > 1) {
+      fetchMatch(favorites).then(setMatch).catch(ctx.handleError);
     }
-
-    if (opened && favorites.length > 1) fetchData();
     return () => setMatch(undefined);
   }, [opened, favorites]);
 

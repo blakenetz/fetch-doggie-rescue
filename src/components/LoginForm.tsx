@@ -1,4 +1,4 @@
-import { AuthContext } from "@/context/Auth";
+import { AppContext } from "@/context/App";
 import { fields, FormState } from "@/types";
 import { Button, Paper, Stack, Text, TextInput } from "@mantine/core";
 import { FormEventHandler, useContext, useState } from "react";
@@ -6,7 +6,7 @@ import { FormEventHandler, useContext, useState } from "react";
 export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<FormState>({});
-  const ctx = useContext(AuthContext);
+  const ctx = useContext(AppContext);
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();

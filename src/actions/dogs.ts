@@ -1,4 +1,4 @@
-import { Results, DogSearchResults, Dog, MatchResults } from "@/types";
+import { DogSearchResults, Dog, MatchResults } from "@/types";
 import { base } from ".";
 import z from "zod";
 
@@ -20,26 +20,10 @@ const DogSchema = z
     sortDirection: z.enum(sortDirections),
   })
   .partial();
+
 export type DogSchemaData = z.infer<typeof DogSchema>;
 
-async function handleResponse<T>(
-  res: Response,
-  total?: number
-): Promise<Results<T>> {
-  const data = await res.json().catch(() => null);
-
-  if (!res.ok) {
-    return {
-      ok: false,
-      message: data?.message || `Failed to gather resource`,
-      status: res.status,
-    };
-  }
-
-  return { ok: true, data, total } as Results<T>;
-}
-
-async function getDogIds(data?: DogSchemaData) {
+async function getDogIds(data?: DogSchemaData): Promise<DogSearchResults> {
   const url = new URL("dogs/search", base);
 
   // add filters
@@ -63,7 +47,9 @@ async function getDogIds(data?: DogSchemaData) {
 
   // make api call
   const res = await fetch(url, { method: "GET", credentials: "include" });
-  return handleResponse<DogSearchResults>(res);
+
+  if (!res.ok) throw res;
+  return res.json();
 }
 
 async function getDogsByIds(searchData: DogSearchResults) {
@@ -74,36 +60,41 @@ async function getDogsByIds(searchData: DogSearchResults) {
     credentials: "include",
     headers: { "Content-Type": "application/json" },
   });
-  return handleResponse<Dog[]>(res, searchData.total);
+
+  if (!res.ok) throw res;
+  return {
+    data: await res.json(),
+    total: searchData.total,
+  };
 }
 
-export async function fetchDogs(data?: DogSchemaData): Promise<Results<Dog[]>> {
-  const res = await getDogIds(data);
-  if (!res.ok) return res;
+export async function fetchDogs(
+  data?: DogSchemaData
+): Promise<{ data: Dog[]; total: number }> {
+  const results = await getDogIds(data);
 
-  return getDogsByIds(res.data);
+  return getDogsByIds(results);
 }
 
-export async function fetchBreeds(): Promise<Results<string[]>> {
+export async function fetchBreeds(): Promise<string[]> {
   const url = new URL("dogs/breeds", base);
   const res = await fetch(url, { method: "GET", credentials: "include" });
-  return handleResponse<string[]>(res);
+  if (!res.ok) throw res;
+  return res.json();
 }
 
-export function validate(formData: FormData): Results<DogSchemaData> {
+export function validate(formData: FormData): DogSchemaData {
   const output = DogSchema.safeParse({
     ageMin: formData.get("age_from"),
     ageMax: formData.get("age_to"),
     breeds: formData.get("breeds"),
   });
 
-  if (!output.success) {
-    return { ok: false, message: "Invalid form data", status: 400 };
-  }
-  return { ok: true, data: output.data };
+  if (!output.success) throw new Error("Invalid form data");
+  return output.data;
 }
 
-async function getMatch(ids: string[]) {
+async function getMatch(ids: string[]): Promise<MatchResults> {
   const url = new URL("dogs/match", base);
   const res = await fetch(url, {
     method: "POST",
@@ -112,22 +103,20 @@ async function getMatch(ids: string[]) {
     headers: { "Content-Type": "application/json" },
   });
 
-  return handleResponse<MatchResults>(res);
+  if (!res.ok) throw res;
+  return res.json();
 }
 
-export async function fetchMatch(ids: string[]): Promise<Results<Dog>> {
-  const res = await getMatch(ids);
-  if (!res.ok) return res;
+export async function fetchMatch(ids: string[]): Promise<Dog> {
+  const results = await getMatch(ids);
 
   const searchData: DogSearchResults = {
-    resultIds: [res.data.match],
+    resultIds: [results.match],
     total: 0,
     next: "",
     prev: "",
   };
 
-  const dogRes = await getDogsByIds(searchData);
-  if (!dogRes.ok) return dogRes;
-
-  return { ...dogRes, data: dogRes.data[0] };
+  const { data } = await getDogsByIds(searchData);
+  return data[0];
 }

@@ -5,8 +5,7 @@ import Footer from "@/components/Footer";
 import Match from "@/components/Match";
 import NoResults from "@/components/NoResults";
 import { AppContext } from "@/context/App";
-import { AuthContext } from "@/context/Auth";
-import { Dog, Results } from "@/types";
+import { Dog } from "@/types";
 import { ActionIcon, Card, Image, SimpleGrid, Skeleton } from "@mantine/core";
 import { useSet } from "@mantine/hooks";
 import { IconHeart } from "@tabler/icons-react";
@@ -15,8 +14,7 @@ import { useContext, useEffect, useState } from "react";
 const placeholders = Array.from({ length: 16 }, (_el, i) => i);
 
 export default function Dogs() {
-  const authCtx = useContext(AuthContext);
-  const appCtx = useContext(AppContext);
+  const ctx = useContext(AppContext);
 
   const [loading, setLoading] = useState(true);
   const [dogs, setDogs] = useState<Dog[]>([]);
@@ -27,32 +25,18 @@ export default function Dogs() {
 
   const favorites = useSet<string>([]);
 
-  function handleError(res: Results<Dog[]>) {
-    if (res.ok) return;
-    if (res.status === 401) authCtx.logout();
-    else {
-      console.error(res);
-      appCtx.setErrorMsg(res.message ?? "An unexpected error occurred.");
-    }
+  async function fetchData(schema?: DogSchemaData) {
+    fetchDogs(schema)
+      .then(({ data, total }) => {
+        setDogs(data);
+        setTotal(total);
+      })
+      .catch(ctx.handleError)
+      .finally(() => setLoading(false));
   }
 
-  function handleResults(res: Results<Dog[]>) {
-    if (!res.ok) handleError(res);
-    else {
-      setDogs(res.data);
-      if (res.total) setTotal(res.total);
-    }
-    setLoading(false);
-  }
-
+  // fetch data on initial load
   useEffect(() => {
-    async function fetchData() {
-      const res = await fetchDogs();
-      handleResults(res);
-
-      if (res.ok && res.total) setTotal(res.total);
-    }
-
     fetchData();
   }, []);
 
@@ -62,18 +46,19 @@ export default function Dogs() {
     setLoading(true);
 
     const formData = new FormData(e.currentTarget);
-    const res = validate(formData);
-
-    if (res.ok) update(res.data);
-    else handleError(res);
+    try {
+      const result = validate(formData);
+      update(result);
+    } catch (error) {
+      ctx.handleError(error);
+    }
   };
 
   const update = async (data?: DogSchemaData) => {
     setLoading(true);
-    const nextData = { ...schemaData, ...data };
-    const res = await fetchDogs(nextData);
-    setSchemaData(nextData);
-    handleResults(res);
+    const schema = { ...schemaData, ...data };
+    setSchemaData(schema);
+    fetchData(schema);
   };
 
   return (
