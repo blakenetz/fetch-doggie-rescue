@@ -55,6 +55,10 @@ If the error is of type `Error`, it will display the error message is an alert.
 
 Otherwise, we display a generic message as an alert.
 
+### Validation
+
+Any/All validation is done with Zod. The forms were simple enough where Zod was the quick and easy solution. Plus, I see Zod everywhere, so I figure it's an industry standard at this point.
+
 ### Optimizations
 
 This project uses the [React Compiler](https://react.dev/learn/react-compiler), so I wasn't too concerned about any memoization strategies.
@@ -66,3 +70,5 @@ The background image is set in the `index.html`, so the user doesn't have to loo
 I would have liked to implement an [AbortController](https://developer.mozilla.org/en-US/docs/Web/API/AbortController) to stop in-flight requests when a new one is made.
 
 I'm also not touching the `/location/` endpoint. I guess I could have utilized it either for dog filtering or expanding on the location data of each dog (currently it's limited to the `zip_code`), but I didn't want this project to balloon, so I focused on a quality MVP instead.
+
+IMHO the footer is a bit of a mess on mobile viewports because I opted for a single layout. I also wanted to keep this a single page (i.e. without a router), so I just crammed as much stuff in the view as possible, which means a heavy reliance on modals.
