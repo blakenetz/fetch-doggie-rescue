@@ -7,7 +7,7 @@ import {
   sortFields,
 } from "@/actions/dogs";
 import { capitalize } from "@/utils";
-import { Button, Divider, Flex, Menu, Pagination } from "@mantine/core";
+import { Button, Flex, Menu, Pagination } from "@mantine/core";
 import { useToggle } from "@mantine/hooks";
 import {
   IconHeart,
