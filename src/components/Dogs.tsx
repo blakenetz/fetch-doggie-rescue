@@ -7,18 +7,15 @@ import NoResults from "@/components/NoResults";
 import { AppContext } from "@/context/App";
 import { Dog } from "@/types";
 import {
-  ActionIcon,
-  Button,
   Card,
   Image,
   SimpleGrid,
   Skeleton,
   ThemeIcon,
-  ThemeIconProps,
   UnstyledButton,
 } from "@mantine/core";
 import { useSet } from "@mantine/hooks";
-import { IconHeart, IconHeartFilled, IconProps } from "@tabler/icons-react";
+import { IconHeart, IconHeartFilled } from "@tabler/icons-react";
 import { useContext, useEffect, useState } from "react";
 
 const placeholders = Array.from({ length: 16 }, (_el, i) => i);
