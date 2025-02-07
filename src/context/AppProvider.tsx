@@ -15,7 +15,8 @@ export default function AppProvider({ children }: React.PropsWithChildren) {
   };
 
   const handleError = (err: unknown) => {
-    if (err instanceof Response) {
+    if (err instanceof Error) setErrorMsg({ message: err.message });
+    else if (err instanceof Response) {
       if (err.status === 401) {
         setIsAuthenticated(false);
         logout();
@@ -25,12 +26,9 @@ export default function AppProvider({ children }: React.PropsWithChildren) {
           message: err.statusText,
         });
       }
-      return;
+    } else {
+      setErrorMsg({ message: "An unknown error occurred" });
     }
-
-    if (err instanceof Error) return setErrorMsg({ message: err.message });
-
-    setErrorMsg({ message: "An unknown error occurred" });
   };
 
   return (
