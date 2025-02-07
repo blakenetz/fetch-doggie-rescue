@@ -1,19 +1,13 @@
-import { DogSchemaData, fetchDogs, limit, validate } from "@/actions/dogs";
+import { DogSchemaData, fetchDogs, validate } from "@/actions/dogs";
+import DogData from "@/components/DogData";
 import Filters, { FilterProps } from "@/components/Filters";
 import Footer from "@/components/Footer";
+import Match from "@/components/Match";
 import NoResults from "@/components/NoResults";
 import { AppContext } from "@/context/App";
 import { AuthContext } from "@/context/Auth";
 import { Dog, Results } from "@/types";
-import {
-  ActionIcon,
-  Card,
-  Image,
-  SimpleGrid,
-  Skeleton,
-  Stack,
-  Text,
-} from "@mantine/core";
+import { ActionIcon, Card, Image, SimpleGrid, Skeleton } from "@mantine/core";
 import { useSet } from "@mantine/hooks";
 import { IconHeart } from "@tabler/icons-react";
 import { useContext, useEffect, useState } from "react";
@@ -27,6 +21,7 @@ export default function Dogs() {
   const [loading, setLoading] = useState(true);
   const [dogs, setDogs] = useState<Dog[]>([]);
   const [showFilter, setShowFilter] = useState(false);
+  const [showMatch, setShowMatch] = useState(false);
   const [total, setTotal] = useState(0);
   const [schemaData, setSchemaData] = useState<DogSchemaData>();
 
@@ -124,32 +119,7 @@ export default function Dogs() {
                     </ActionIcon>
                   </Card.Section>
 
-                  <Stack gap={2} mt="md">
-                    <Text size="sm">
-                      Name:{" "}
-                      <Text inherit component="span" c="dimmed">
-                        {dog.name}
-                      </Text>
-                    </Text>
-                    <Text size="sm">
-                      Age:{" "}
-                      <Text inherit component="span" c="dimmed">
-                        {dog.age}
-                      </Text>
-                    </Text>
-                    <Text size="sm">
-                      Breed:{" "}
-                      <Text inherit component="span" c="dimmed">
-                        {dog.breed}
-                      </Text>
-                    </Text>
-                    <Text size="sm">
-                      Zip Code:{" "}
-                      <Text inherit component="span" c="dimmed">
-                        {dog.zip_code}
-                      </Text>
-                    </Text>
-                  </Stack>
+                  <DogData dog={dog} />
                 </Card>
               );
             })}
@@ -161,9 +131,16 @@ export default function Dogs() {
         onClose={() => setShowFilter(false)}
       />
 
+      <Match
+        favorites={Array.from(favorites.values())}
+        opened={showMatch}
+        onClose={() => setShowMatch(false)}
+      />
+
       <Footer
         onFilterClick={() => setShowFilter(true)}
-        total={Math.floor(total / limit) - 1}
+        onMatchClick={() => setShowMatch(true)}
+        total={total}
         update={update}
       />
     </>

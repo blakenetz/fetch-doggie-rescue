@@ -1,4 +1,4 @@
-import { Results, DogSearchResults, Dog } from "@/types";
+import { Results, DogSearchResults, Dog, MatchResults } from "@/types";
 import { base } from ".";
 import z from "zod";
 
@@ -101,4 +101,33 @@ export function validate(formData: FormData): Results<DogSchemaData> {
     return { ok: false, message: "Invalid form data", status: 400 };
   }
   return { ok: true, data: output.data };
+}
+
+async function getMatch(ids: string[]) {
+  const url = new URL("dogs/match", base);
+  const res = await fetch(url, {
+    method: "POST",
+    body: JSON.stringify(ids),
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+  });
+
+  return handleResponse<MatchResults>(res);
+}
+
+export async function fetchMatch(ids: string[]): Promise<Results<Dog>> {
+  const res = await getMatch(ids);
+  if (!res.ok) return res;
+
+  const searchData: DogSearchResults = {
+    resultIds: [res.data.match],
+    total: 0,
+    next: "",
+    prev: "",
+  };
+
+  const dogRes = await getDogsByIds(searchData);
+  if (!dogRes.ok) return dogRes;
+
+  return { ...dogRes, data: dogRes.data[0] };
 }

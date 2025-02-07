@@ -20,6 +20,10 @@ export interface DogSearchResults {
   prev: string;
 }
 
+export interface MatchResults {
+  match: string;
+}
+
 export interface Dog {
   id: string;
   img: string;

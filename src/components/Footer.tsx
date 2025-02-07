@@ -1,22 +1,34 @@
 import {
   DogSchemaData,
+  limit,
   SortDirection,
   sortDirections,
   SortField,
   sortFields,
 } from "@/actions/dogs";
-import { Button, Flex, Menu, Pagination } from "@mantine/core";
+import { capitalize } from "@/utils";
+import { Button, Divider, Flex, Menu, Pagination } from "@mantine/core";
 import { useToggle } from "@mantine/hooks";
-import { IconSortAscending, IconSortDescending } from "@tabler/icons-react";
+import {
+  IconHeart,
+  IconSortAscending,
+  IconSortDescending,
+} from "@tabler/icons-react";
 import { useState } from "react";
 
 export interface FooterProps {
   onFilterClick: () => void;
+  onMatchClick: () => void;
   total: number;
   update: (data?: DogSchemaData) => void;
 }
 
-export default function Footer({ onFilterClick, total, update }: FooterProps) {
+export default function Footer({
+  onFilterClick,
+  onMatchClick,
+  total,
+  update,
+}: FooterProps) {
   const [activePage, setPage] = useState(1);
   const [sortField, setSortField] = useState<SortField>(sortFields[0]);
   const [sortDirection, toggleSortDirection] =
@@ -28,6 +40,7 @@ export default function Footer({ onFilterClick, total, update }: FooterProps) {
   return (
     <Flex
       component="footer"
+      wrap="wrap"
       pos="fixed"
       bottom={0}
       left={0}
@@ -37,13 +50,17 @@ export default function Footer({ onFilterClick, total, update }: FooterProps) {
       p="xs"
       gap="md"
     >
-      <Flex gap="sm">
-        <Button onClick={onFilterClick}>Filters</Button>
+      <Flex gap="xs">
+        <Button onClick={onFilterClick} size="xs">
+          Filters
+        </Button>
 
         <Button.Group>
-          <Menu position="top-end">
+          <Menu width="target">
             <Menu.Target>
-              <Button variant="default">{`Sort By: ${sortField}`}</Button>
+              <Button variant="default" size="xs">{`Sort By: ${capitalize(
+                sortField
+              )}`}</Button>
             </Menu.Target>
             <Menu.Dropdown>
               <Menu.Label>Sort By</Menu.Label>
@@ -55,12 +72,13 @@ export default function Footer({ onFilterClick, total, update }: FooterProps) {
                     update({ sortField: field });
                   }}
                 >
-                  {field}
+                  {capitalize(field)}
                 </Menu.Item>
               ))}
             </Menu.Dropdown>
           </Menu>
           <Button
+            size="xs"
             variant="default"
             aria-label="Sort Order"
             onClick={() => {
@@ -73,14 +91,27 @@ export default function Footer({ onFilterClick, total, update }: FooterProps) {
             {icon}
           </Button>
         </Button.Group>
+
+        <Button
+          size="xs"
+          variant="subtle"
+          color="red"
+          rightSection={<IconHeart size={16} />}
+          onClick={onMatchClick}
+        >
+          See Match
+        </Button>
       </Flex>
+
       <Pagination
-        total={total}
+        total={Math.floor(total / limit) - 1}
         value={activePage}
         onChange={(value) => {
           update({ page: value });
           setPage(value);
         }}
+        hideWithOnePage
+        size="sm"
       />
     </Flex>
   );
