@@ -3,7 +3,6 @@ import LoginForm from "@/components/LoginForm";
 import { AppContext } from "@/context/App";
 import { Alert, Divider, Flex, Stack, Text, Title } from "@mantine/core";
 import { useContext } from "react";
-import styles from "./App.module.css";
 
 function App() {
   const { errorMsg, isAuthenticated, clearErrorMsg } = useContext(AppContext);
@@ -17,8 +16,6 @@ function App() {
       gap="xl"
       align="center"
     >
-      <div className={styles.background} />
-
       {errorMsg && (
         <Alert
           variant="light"
